@@ -59,20 +59,36 @@ class MultiReturnTransformer
 			return switch(e.expr)
 			{
 				case EReturn(ret):
-					if (ret == null) e;
-					else
-					{
-						var retT = transform(ret, enumInfo, ctx);
-						var t = retT.typeof(ctx).sure();
-						var filter = Lambda.filter(enumInfo.types, function(type) return type.getID() == t.getID());
-						if (filter.length == 1)
-							EReturn(["hxmr", "types", "MultiReturn" + enumInfo.id, getName(filter.first())].drill().call([ret])).at();
-						else
-							e;
-					}
+					if (ret != null)
+						e.expr = EReturn(mapOnce(ret, enumInfo, ctx));
+					e;
 				default: e;
 			}
 		}, ctx);		
+	}
+
+	static function mapOnce(expr:Expr, enumInfo:EnumInfo, ctx):Expr
+	{
+		return expr.map(function(e, ctx)
+		{
+			return switch(e.expr)
+			{
+				case EBlock(_), ESwitch(_, _, _), EParenthesis(_), EIf(_, _, _), ETry(_, _), EFunction(_), ETernary(_, _, _):
+					e;
+				default:
+					buildReturn(e, enumInfo, ctx);
+			}
+		}, ctx);
+	}
+	
+	static function buildReturn(expr:Expr, enumInfo:EnumInfo, ctx)
+	{
+		var t = expr.typeof(ctx).sure();
+		var filter = Lambda.filter(enumInfo.types, function(type) return type.getID() == t.getID());
+		return if (filter.length == 1)
+			["hxmr", "types", "MultiReturn" + enumInfo.id, getName(filter.first())].drill().call([expr]);
+		else
+			expr;	
 	}
 	
 	static function buildEnum(tp:TypePath, pos):EnumInfo

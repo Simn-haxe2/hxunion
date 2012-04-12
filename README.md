@@ -33,12 +33,12 @@ You can declare a function returning either of these like so:
 public function doSomething():MultiReturn<[MyProblem, MySuccess]>
 {
 	var rand = Std.random(4);
-	switch(rand)
+	return switch(rand)
 	{
-		case 1: return CoffeeShortage(3);
-		case 2: return BossDead;
-		case 3: return FoundGold;
-		default: return LessImportant;
+		case 1: CoffeeShortage(3);
+		case 2: BossDead;
+		case 3: FoundGold;
+		default: LessImportant;
 	}
 }
 

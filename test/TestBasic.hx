@@ -118,4 +118,20 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 		else
 			return "Just a string";
 	}
+	
+	public function unificationProblems():hxmr.MultiReturn<[Int, String]>
+	{
+		return if (true) 12 else "12";
+		
+		return switch(false)
+		{
+			case true: 99;
+			case false: "99";
+		}
+		
+		return false ? "foo" : 12;
+		return 4 + 2;
+		
+		return ([1, 12])[0];
+	}
 }
