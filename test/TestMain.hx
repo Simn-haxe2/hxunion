@@ -6,6 +6,7 @@ class TestMain
 	{
 		var r = new TestRunner();
 		r.add(new TestBasic());
+		r.add(new TestReadme());
 		r.run();
 	}
 }

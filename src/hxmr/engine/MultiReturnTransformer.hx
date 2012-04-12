@@ -20,7 +20,7 @@ class MultiReturnTransformer
 	#if macro
 	
 	static var count = 0;
-	static var cache = new Hash<ComplexType>();
+	static var cache = new Hash<EnumInfo>();
 	
 	static function checkReturns(ctx:ClassBuildContext)
 	{
@@ -35,14 +35,14 @@ class MultiReturnTransformer
 					switch(func.ret)
 					{
 						case TPath(p):
-							if (p.name == "MultiReturn" && p.pack.length == 1 && p.pack[0] == "hxmr")
+							if (p.name == "MultiReturn")
 							{
 								var innerCtx = env.copy();
 								for (arg in func.args)
 									innerCtx.push( { name:arg.name, type:arg.type, expr: null } );	
-								var multiEnum = buildEnum(p, field.pos);
-								func.ret = multiEnum.cType;
-								func.expr = transform(func.expr, multiEnum, innerCtx);
+								var enumInfo = buildEnum(p, field.pos);
+								func.ret = enumInfo.cType;
+								func.expr = transform(func.expr, enumInfo, innerCtx);
 							}
 						default:
 							continue;
@@ -52,7 +52,7 @@ class MultiReturnTransformer
 		}
 	}
 
-	static function transform(expr:Expr, multiEnum:EnumInfo, ctx):Expr
+	static function transform(expr:Expr, enumInfo:EnumInfo, ctx):Expr
 	{
 		return expr.map(function(e:Expr, ctx)
 		{
@@ -62,11 +62,11 @@ class MultiReturnTransformer
 					if (ret == null) e;
 					else
 					{
-						var retT = transform(ret, multiEnum, ctx);
+						var retT = transform(ret, enumInfo, ctx);
 						var t = retT.typeof(ctx).sure();
-						var filter = Lambda.filter(multiEnum.types, function(type) return type.getID() == t.getID());
+						var filter = Lambda.filter(enumInfo.types, function(type) return type.getID() == t.getID());
 						if (filter.length == 1)
-							EReturn(["hxmr", "types", "MultiReturn" + (count - 1), getName(filter.first())].drill().call([ret])).at();
+							EReturn(["hxmr", "types", "MultiReturn" + enumInfo.id, getName(filter.first())].drill().call([ret])).at();
 						else
 							e;
 					}
@@ -109,7 +109,7 @@ class MultiReturnTransformer
 			default: Context.error(MULTI_ENUM_EXPECTS_TYPE_LIST, pos);
 		}
 
-		return { cType: define(types, pos), types: types };
+		return define(types, pos);
 	}
 	
 	static function define(types:Array<Type>, pos)
@@ -123,11 +123,12 @@ class MultiReturnTransformer
 			return n1 < n2 ? -1 : 1;
 		});	
 		
-		var signature = Context.signature(types);
+		
+		var signature = Lambda.fold(types, function(type, r) return r + "$" +type.getID(), "MultiReturn");
 		if (cache.exists(signature))
 			return cache.get(signature);
-			
-		var name = "MultiReturn" +count++;
+		var id = count++;
+		var name = "MultiReturn" +id;
 		
 		var fields = [];
 		var params = [];
@@ -159,8 +160,9 @@ class MultiReturnTransformer
 			sub: null
 		});
 
-		cache.set(signature, cType);
-		return cType;
+		var typeInfo = { cType: cType, id: id, types: types };
+		cache.set(signature, typeInfo);
+		return typeInfo;
 	}
 	
 	static function makeField(name:String, type:ComplexType, pos)
@@ -205,5 +207,6 @@ class MultiReturnTransformer
 typedef EnumInfo =
 {
 	cType: ComplexType,
-	types: Array<Type>
+	types: Array<Type>,
+	id: Int
 }
