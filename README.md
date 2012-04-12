@@ -6,7 +6,7 @@ This library allows functions to return multiple types by creating a common enum
 Usage
 -------
 
-Simply make classes use `implements hxmr.MultiReturnSupport` and you are good to go. You can list allowed types as your method's return type by using the syntax `hxme.MultiReturn<[Type1, Type2, ..., TypeN]>`. This will create a hidden enum with constructors for `Type1` to `TypeN` that you can switch over.
+Simply make classes use `implements hxmr.MultiReturnSupport` and you are good to go. You can list allowed types as your method's return type by using the syntax `hxmr.MultiReturn<[Type1, Type2, ..., TypeN]>`. This will create a hidden enum with constructors for `Type1` to `TypeN` that you can switch over.
 
 Assuming you defined two enums:
 
