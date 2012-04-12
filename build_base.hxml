@@ -1,0 +1,5 @@
+-D haxe_209
+-cp src
+-cp test
+-cp ../tinkerbell/src
+-main TestMain

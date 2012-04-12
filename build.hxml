@@ -1,0 +1,23 @@
+build_base.hxml
+-neko bin/neko.n
+
+--next
+build_base.hxml
+-swf bin/swf9.swf
+
+--next
+build_base.hxml
+-swf-version 8
+-swf bin/swf8.swf
+
+--next
+build_base.hxml
+-php bin/php
+
+--next
+build_base.hxml
+-js bin/js.js
+
+--next
+build_base.hxml
+-cpp bin/cpp
