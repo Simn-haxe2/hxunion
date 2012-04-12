@@ -67,3 +67,19 @@ static public function main()
 }
 
 ```
+
+Of course the types must not be enums, you can return different class types as well:
+
+```
+
+public function multiClassReturn():hxmr.MultiReturn<[Int, String, Xml]>
+{
+	if (Date.now().getHours() == 23 && Date.now().getMinutes() == 58)
+		return Xml.parse("<two minutes='till'>midnight</two>");
+	if (Date.now().getMinutes() < 20)
+		return 12;
+	else
+		return "Just a string";
+}
+
+```

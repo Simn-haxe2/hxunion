@@ -70,7 +70,17 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 			case Class1(v):
 				assertTrue(Std.is(v, Class1));
 				assertEquals("foobar", v.value);
-		}		
+		}
+		
+		switch(multiClassReturn())
+		{
+			case String(s):
+				assertEquals("Just a string", s);
+			case Int(i):
+				assertEquals(12, i);
+			case Xml(xml):
+				assertTrue(false);
+		}
 	}
 	
 	public function multiEnumReturn(b:Bool):hxmr.MultiReturn<[Enum1, Enum2]>
@@ -97,5 +107,15 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 			case 1: return new Class1("foobar");
 			default: return E2b;
 		}
+	}
+	
+	public function multiClassReturn():hxmr.MultiReturn<[Int, String, Xml]>
+	{
+		if (Date.now().getHours() == 23 && Date.now().getMinutes() == 58)
+			return Xml.parse("<two minutes='till'>midnight</two>");
+		if (Date.now().getMinutes() < 20)
+			return 12;
+		else
+			return "Just a string";
 	}
 }
