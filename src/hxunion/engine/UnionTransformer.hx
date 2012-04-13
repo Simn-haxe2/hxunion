@@ -30,7 +30,7 @@ class UnionTransformer
 		var env = [];
 		
 		if (ctx.cls.superClass != null)
-			getMembers(ctx.cls.superClass.t.get(), env);
+			MacroHelper.getMembers(ctx.cls.superClass.t.get(), env);
 			
 		var fieldData = new Hash();
 		
@@ -75,11 +75,10 @@ class UnionTransformer
 									unionInfos.push(unionInfo);
 								}
 							default:
-								continue;
 						}
 						
 					if (func.ret != null)
-						env.push( { name:field.name, type:TFunction(tfArgs, func.ret), expr:null } );
+						env.push( { name:field.name, type:func.ret != null ? TFunction(tfArgs, func.ret) : null, expr:null } );
 						
 					fieldData.set(field.name, {unionInfos: unionInfos, ctx: funcCtx });
 				default:
@@ -160,7 +159,7 @@ class UnionTransformer
 								switch(t.isSubTypeOf(type))
 								{
 									case Success(t):
-										return ["hxunion", "types", "Union" + unionInfo.id, UnionBuilder.getName(t)].drill().call([expr]);
+										return ["hxunion", "types", "Union" + unionInfo.id, MacroHelper.getName(t)].drill().call([expr]);
 									case Failure(_):
 								}
 							}
@@ -170,14 +169,6 @@ class UnionTransformer
 				{ expr: expr.expr, pos: expr.pos }
 		}
 	}
-	
-	static function getMembers(cls:ClassType, ctx:Array<tink.macro.tools.ExprTools.VarDecl>)
-	{
-		for (field in cls.fields.get())
-			ctx.push( { name:field.name, type:null, expr: null } );
-		if (cls.superClass != null)
-			getMembers(cls.superClass.t.get(), ctx);
-	}
-		
+
 	#end
 }

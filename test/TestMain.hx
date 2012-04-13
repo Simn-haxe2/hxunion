@@ -8,6 +8,7 @@ class TestMain
 		r.add(new TestBasic());
 		r.add(new TestReadme());
 		r.add(new TestUsing());
+		r.add(new TestTuple());
 		r.run();
 	}
 }
