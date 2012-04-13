@@ -30,4 +30,9 @@ class MyUsing implements UnionSupport
 		}
 		return arg;
 	}
+	
+	static public function getIntOrString(asInt:Bool):hxunion.Union<[Int, String]>
+	{
+		return asInt ? Int(13) : String("value");
+	}	
 }

@@ -1,22 +1,16 @@
 package ;
 import haxe.unit.TestCase;
-import hxunion.UnionSupport;
 
 using MyUsing;
 
-class TestUsing extends TestCase, implements UnionSupport
+class TestUsing extends TestCase
 {
-	static function getIntOrString(asInt:Bool):hxunion.Union<[Int, String]>
-	{
-		return asInt ? Int(13) : String("value");
-	}
-	
 	public function testUsing()
 	{
-		var c = getIntOrString(true);
+		var c = MyUsing.getIntOrString(true);
 		assertEquals("26", c.usingTest());
 
-		var c2 = getIntOrString(false);
+		var c2 = MyUsing.getIntOrString(false);
 		assertEquals("VALUE", c2.usingTest());
 		
 		switch(c.usingTestUnion())
@@ -35,7 +29,7 @@ class TestUsing extends TestCase, implements UnionSupport
 				assertEquals("VALUE", s);
 		}
 		
-		var c3 = getIntOrString(false);
+		var c3 = MyUsing.getIntOrString(false);
 		c3.ifString(function(s) assertEquals("value", s));
 	}	
 }
