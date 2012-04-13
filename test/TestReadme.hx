@@ -1,7 +1,7 @@
 package ;
 import haxe.unit.TestCase;
-import hxmr.MultiReturn;
-import hxmr.MultiReturnSupport;
+import hxunion.Union;
+import hxunion.UnionSupport;
 
 enum MyProblem
 {
@@ -15,7 +15,7 @@ enum MySuccess
 	FoundGold;
 }
 
-class TestReadme extends TestCase, implements MultiReturnSupport
+class TestReadme extends TestCase, implements UnionSupport
 {
 	public function testBasic()
 	{
@@ -37,7 +37,7 @@ class TestReadme extends TestCase, implements MultiReturnSupport
 		assertTrue(true);
 	}
 	
-	public function doSomething():MultiReturn<[MyProblem, MySuccess]>
+	public function doSomething():Union<[MyProblem, MySuccess]>
 	{
 		var rand = Std.random(4);
 		return switch(rand)

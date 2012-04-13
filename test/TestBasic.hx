@@ -1,7 +1,7 @@
 package ;
 import haxe.unit.TestCase;
-import hxmr.MultiReturn<T>;
-import hxmr.MultiReturnSupport;
+import hxunion.Union<T>;
+import hxunion.UnionSupport;
 import sub.Enum3;
 
 enum Enum1
@@ -27,7 +27,7 @@ class Class1
 	}
 }
 
-class TestBasic extends TestCase, implements MultiReturnSupport
+class TestBasic extends TestCase, implements UnionSupport
 {
 	public function testBasic()
 	{
@@ -83,7 +83,7 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 		}
 	}
 	
-	public function multiEnumReturn(b:Bool):hxmr.MultiReturn<[Enum1, Enum2]>
+	public function multiEnumReturn(b:Bool):hxunion.Union<[Enum1, Enum2]>
 	{
 		if (b)
 			return E2a("foo");
@@ -91,7 +91,7 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 			return E2b;
 	}
 	
-	public function multiEnumReturn2(b:Bool):hxmr.MultiReturn<[Enum1, Enum2]>
+	public function multiEnumReturn2(b:Bool):hxunion.Union<[Enum1, Enum2]>
 	{
 		return if (b)
 			E1b("foo");
@@ -99,7 +99,7 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 			E1c(15);
 	}	
 	
-	public function multiEnumReturn3(i:Int):hxmr.MultiReturn<[Enum2, Class1]>
+	public function multiEnumReturn3(i:Int):hxunion.Union<[Enum2, Class1]>
 	{
 		switch(i)
 		{
@@ -109,7 +109,7 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 		}
 	}
 	
-	public function multiClassReturn():hxmr.MultiReturn<[Int, String, Xml]>
+	public function multiClassReturn():hxunion.Union<[Int, String, Xml]>
 	{
 		if (Date.now().getHours() == 23 && Date.now().getMinutes() == 58)
 			return Xml.parse("<two minutes='till'>midnight</two>");
@@ -119,7 +119,7 @@ class TestBasic extends TestCase, implements MultiReturnSupport
 			return "Just a string";
 	}
 	
-	public function unificationProblems():hxmr.MultiReturn<[Int, String]>
+	public function unificationProblems():hxunion.Union<[Int, String]>
 	{
 		return if (true) 12 else "12";
 		
