@@ -55,9 +55,9 @@ class UnionBuilder
 	
 	static public function findUnion(name:String, unions:Array<UnionInfo>)
 	{
-		for (UnionInfo in unions)
+		for (unionInfo in unions)
 		{
-			switch(UnionInfo.cType)
+			switch(unionInfo.cType)
 			{
 				case TPath(p):
 					for (param in p.params)

@@ -43,7 +43,7 @@ class UnionTransformer
 				case FProp(g, s, t, e):
 					env.push( { name:field.name, type:t, expr:null } );				
 				case FFun(func):
-					var UnionInfos:Array<UnionInfo> = [];
+					var unionInfos:Array<UnionInfo> = [];
 					var funcCtx = [];
 					
 					var tfArgs = [];
@@ -55,8 +55,8 @@ class UnionTransformer
 								case TPath(p):
 									if (p.name == "Union")
 									{
-										var UnionInfo = UnionBuilder.buildUnion(p, field.pos);
-										arg.type = UnionInfo.cType;
+										var unionInfo = UnionBuilder.buildUnion(p, field.pos);
+										arg.type = unionInfo.cType;
 									}
 								default:
 							}
@@ -70,9 +70,9 @@ class UnionTransformer
 							case TPath(p):
 								if (p.name == "Union")
 								{
-									var UnionInfo = UnionBuilder.buildUnion(p, field.pos);
-									func.ret = UnionInfo.cType;
-									UnionInfos.push(UnionInfo);
+									var unionInfo = UnionBuilder.buildUnion(p, field.pos);
+									func.ret = unionInfo.cType;
+									unionInfos.push(unionInfo);
 								}
 							default:
 								continue;
@@ -81,7 +81,7 @@ class UnionTransformer
 					if (func.ret != null)
 						env.push( { name:field.name, type:TFunction(tfArgs, func.ret), expr:null } );
 						
-					fieldData.set(field.name, {UnionInfos: UnionInfos, ctx: funcCtx });
+					fieldData.set(field.name, {unionInfos: unionInfos, ctx: funcCtx });
 				default:
 			}
 		}
@@ -93,17 +93,17 @@ class UnionTransformer
 				case Success(func):
 					var fieldInfo = fieldData.get(field.name);
 					var innerCtx = env.concat(fieldInfo.ctx);
-					if (fieldInfo.UnionInfos.length > 0)
+					if (fieldInfo.unionInfos.length > 0)
 					{
-						func.expr = replaceCalls(func.expr, fieldInfo.UnionInfos, innerCtx);
-						func.expr = replaceReturns(func.expr, fieldInfo.UnionInfos, innerCtx);
+						func.expr = replaceCalls(func.expr, fieldInfo.unionInfos, innerCtx);
+						func.expr = replaceReturns(func.expr, fieldInfo.unionInfos, innerCtx);
 					}
 				default:
 			}
 		}
 	}
 
-	static function replaceCalls(expr:Expr, UnionInfos:Array<UnionInfo>, ctx):Expr
+	static function replaceCalls(expr:Expr, unionInfos:Array<UnionInfo>, ctx):Expr
 	{
 		return expr.map(function(e:Expr, ctx)
 		{
@@ -113,7 +113,7 @@ class UnionTransformer
 					var e = switch(target.getIdent())
 					{
 						case Success(i):
-							switch(UnionBuilder.findUnion(i, UnionInfos))
+							switch(UnionBuilder.findUnion(i, unionInfos))
 							{
 								case Success(e): (e + "." +i).resolve().call(params);
 								case Failure(_): e;
@@ -126,7 +126,7 @@ class UnionTransformer
 		}, ctx);		
 	}
 	
-	static function replaceReturns(expr:Expr, UnionInfos:Array<UnionInfo>, ctx):Expr
+	static function replaceReturns(expr:Expr, unionInfos:Array<UnionInfo>, ctx):Expr
 	{
 		return expr.map(function(expr, ctx)
 		{
@@ -134,7 +134,7 @@ class UnionTransformer
 			{
 				case EReturn(ret):
 					if (ret != null)
-						expr.expr = EReturn(ret.map(callback(makeReturn, UnionInfos), ctx));
+						expr.expr = EReturn(ret.map(callback(makeReturn, unionInfos), ctx));
 					expr;
 				default:
 					expr;
@@ -142,7 +142,7 @@ class UnionTransformer
 		}, ctx);
 	}
 
-	static function makeReturn(UnionInfos:Array<UnionInfo>, expr:Expr, ctx):Expr
+	static function makeReturn(unionInfos:Array<UnionInfo>, expr:Expr, ctx):Expr
 	{
 		return switch(expr.expr)
 		{
@@ -154,13 +154,13 @@ class UnionTransformer
 				switch(t)
 				{
 					case Success(t):
-						for (UnionInfo in UnionInfos)
-							for (type in UnionInfo.types)
+						for (unionInfo in unionInfos)
+							for (type in unionInfo.types)
 							{
 								switch(t.isSubTypeOf(type))
 								{
 									case Success(t):
-										return ["hxunion", "types", "Union" + UnionInfo.id, UnionBuilder.getName(t)].drill().call([expr]);
+										return ["hxunion", "types", "Union" + unionInfo.id, UnionBuilder.getName(t)].drill().call([expr]);
 									case Failure(_):
 								}
 							}
