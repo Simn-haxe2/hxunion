@@ -3,6 +3,24 @@ import haxe.unit.TestCase;
 import hxunion.Tuple;
 import hxunion.TupleSupport;
 
+class TestParam<T> extends TestCase, implements TupleSupport
+{
+	public function new(t:T)
+	{
+		super();
+	}
+	
+	public function doSomething(input:Tuple<[Int, String]>):T
+	{
+		return null;
+	}
+	
+	static public function swap<T>(input:Tuple<[T, String]>):Tuple<[String, T]>
+	{
+		return ([input.val2, input.val1]);
+	}
+}
+
 class TestTuple extends TestCase, implements TupleSupport
 {
 	public function testBasic()
@@ -40,6 +58,13 @@ class TestTuple extends TestCase, implements TupleSupport
 		
 		var c8 = takeWithParams("foo", ([9, 2, "bar"]));
 		assertEquals("barfoo", c8[0]);
+		
+		var t1 = new TestParam(5.2);
+		t1.doSomething(([12, "hello"]));
+		
+		var c9 = TestParam.swap(([1, "2"]));
+		assertEquals("2", c9.val1);
+		assertEquals(1, c9.val2);
 	}
 	
 	public function createTuple()

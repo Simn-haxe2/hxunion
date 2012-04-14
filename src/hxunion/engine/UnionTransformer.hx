@@ -32,9 +32,7 @@ class UnionTransformer
 		
 		if (ctx.cls.superClass != null)
 			MacroHelper.getMembers(ctx.cls.superClass.t.get(), env);
-			
-		var classMonos = MacroHelper.makeMonoHash(ctx.cls.params.map(function(p) return p.name));
-		
+
 		var fieldData = new Hash();
 		
 		for (field in ctx.members)
@@ -48,7 +46,7 @@ class UnionTransformer
 				case FFun(func):
 					var unionInfos:Array<UnionInfo> = [];
 					var funcCtx = [];
-					var monos = func.params.map(function(p) return p.name).makeMonoHash().merge(classMonos);
+					var monos = func.params.map(function(p) return p.name).makeMonoHash();
 					var tfArgs = [];
 					for (arg in func.args)
 					{

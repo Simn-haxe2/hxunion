@@ -116,17 +116,7 @@ class MacroHelper
 			hash.set(name, makeMono());
 		return hash;
 	}
-	
-	static public function merge(h1:Hash<Type>, h2:Hash<Type>)
-	{
-		var h3 = new Hash();
-		for (key in h1.keys())
-			h3.set(key, h1.get(key));
-		for (key in h2.keys())
-			h3.set(key, h2.get(key));
-		return h3;
-	}
-	
+
 	static public function toName(pack:Array<String>, name:String)
 		return pack.length == 0 ? name : pack.join(".") + "." + name
 		

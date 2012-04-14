@@ -31,8 +31,6 @@ class TupleTransformer
 		
 		if (ctx.cls.superClass != null)
 			MacroHelper.getMembers(ctx.cls.superClass.t.get(), env);
-			
-		var classMonos = MacroHelper.makeMonoHash(ctx.cls.params.map(function(p) return p.name));
 
 		for (field in ctx.members)
 		{
@@ -45,7 +43,7 @@ class TupleTransformer
 				case FFun(func):
 					var tfArgs = [];
 					
-					var monos = func.params.map(function(p) return p.name).makeMonoHash().merge(classMonos);
+					var monos = func.params.map(function(p) return p.name).makeMonoHash();
 
 					for (arg in func.args)
 					{
