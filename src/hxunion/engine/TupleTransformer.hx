@@ -14,7 +14,8 @@ import hxunion.engine.Types;
 using tink.macro.tools.ExprTools;
 using tink.macro.tools.TypeTools;
 using tink.core.types.Outcome;
-
+using Lambda;
+using hxunion.engine.MacroHelper;
 #end
 
 class TupleTransformer
@@ -31,6 +32,8 @@ class TupleTransformer
 		if (ctx.cls.superClass != null)
 			MacroHelper.getMembers(ctx.cls.superClass.t.get(), env);
 			
+		var classMonos = MacroHelper.makeMonoHash(ctx.cls.params.map(function(p) return p.name));
+
 		for (field in ctx.members)
 		{
 			switch (field.kind)
@@ -41,29 +44,36 @@ class TupleTransformer
 					env.push( { name:field.name, type:t, expr:null } );				
 				case FFun(func):
 					var tfArgs = [];
+					
+					var monos = func.params.map(function(p) return p.name).makeMonoHash().merge(classMonos);
+
 					for (arg in func.args)
 					{
 						if (arg.type != null)
 							switch(arg.type)
 							{
 								case TPath(p):
+									arg.type = MacroHelper.monofy(arg.type, monos);
 									if (p.name == "Tuple")
-										arg.type = TPath(TupleBuilder.buildFromTypePath(p, field.pos));
+										arg.type = TPath(TupleBuilder.buildFromTypePath(p, monos, field.pos));
 								default:
+									trace(arg.type);
 							}
 						tfArgs.push(arg.type);
 					}
 					
-					if (func.ret != null)			
+					var ret = func.ret == null ? null :			
 						switch(func.ret)
 						{
 							case TPath(p):
+								func.ret = MacroHelper.monofy(func.ret, monos);
 								if (p.name == "Tuple")
-									func.ret = TPath(TupleBuilder.buildFromTypePath(p, field.pos));
-							default:
-						}
+									func.ret = TPath(TupleBuilder.buildFromTypePath(p, monos, field.pos));
+								func.ret;
+							default: func.ret;
+						};
 						
-					env.push( { name:field.name, type:func.ret != null ? TFunction(tfArgs, func.ret) : null, expr:null } );	
+					env.push( { name:field.name, type:ret != null ? TFunction(tfArgs, ret) : null, expr:null } );
 			}
 		}
 		
@@ -96,12 +106,15 @@ class TupleTransformer
 							var t = switch(e.typeof(ctx))
 							{
 								case Success(t): t;
-								case Failure(f): Context.getType("Dynamic");
+								case Failure(f): MacroHelper.makeMono();
 							};
 							types.push(t);
 						}
-						var t = TupleBuilder.buildFromTypes(types, expr.pos);
-						t.instantiate(exprs);
+						TupleBuilder.buildFromTypes(types, expr.pos);
+						var args = [];
+						for (i in 0...exprs.length)
+							args.push( { field: "val" +(i + 1), expr: exprs[i] } );
+						EObjectDecl(args).at(expr.pos);
 					default: expr;
 				}
 			default: expr;

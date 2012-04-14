@@ -16,9 +16,9 @@ class TupleBuilder
 	static var count = 0;
 	static var cache = new Hash<TypePath>();
 	
-	static public function buildFromTypePath(tp:TypePath, pos)
+	static public function buildFromTypePath(tp:TypePath, params, pos)
 	{
-		var types = MacroHelper.getTypesFromTypePath(tp, pos);
+		var types = MacroHelper.getTypesFromTypePath(tp, params, pos);
 		return buildFromTypes(types, pos);
 	}
 	
@@ -33,8 +33,6 @@ class TupleBuilder
 		var fields = [];
 		var params = [];
 		var params2 = [];
-		var ctorArgs = [];
-		var ctorAssigns = [];
 		
 		var i = 1;
 		for (type in types)
@@ -44,28 +42,7 @@ class TupleBuilder
 			fields.push(makeField(fieldName, complexType, pos));
 			params.push({name:MacroHelper.getName(type), constraints:[]});
 			params2.push(TPType(complexType));
-			ctorArgs.push( {
-				name: fieldName,
-				opt: false,
-				type: complexType,
-				value: null
-			});
-			ctorAssigns.push(["this", fieldName].drill().assign(fieldName.resolve()));
 		}
-		
-		fields.push({
-			name: "new",
-			doc: null,
-			access: [APublic],
-			meta: [],
-			pos: pos,
-			kind: FFun( {
-					ret: null,
-					params: [],
-					expr: EBlock(ctorAssigns).at(pos),
-					args: ctorArgs
-				})
-		});
 		
 		Context.defineType( {
 			pack: ["hxunion", "types"],
@@ -74,7 +51,7 @@ class TupleBuilder
 			meta: [],
 			params: params,
 			isExtern: false,
-			kind: TDClass(null, null, null),
+			kind: TDStructure,
 			fields: fields
 		});
 

@@ -26,13 +26,14 @@ class MacroHelper
 			case TInst(i, _): i.get().name;
 			case TEnum(i, _): i.get().name;
 			case TType(i, _): i.get().name;
+			case TMono(_): "mono";
 			default: Context.error("Could not determine name of " +t, Context.currentPos());
 		}
 		
-	static public function getTypesFromTypePath(tp:TypePath, pos)
+	static public function getTypesFromTypePath(tp:TypePath, monos, pos)
 	{
 		if (tp.params.length != 1)
-			Context.error(MULTI_ENUM_EXPECTS_TYPE_LIST, pos);
+			Context.error(TYPE_LIST_EXPECTS_TYPE_LIST, pos);
 			
 		return switch(tp.params[0])
 		{
@@ -50,24 +51,87 @@ class MacroHelper
 									{
 										case TInst(_), TEnum(_): t;
 										case TType(tt, _): Context.getType(toName(tt.get().pack, tt.get().name.substr(1)));
-										default: Context.error("Could not find type: " +t, pos);
+										default: Context.error(NO_SUCH_TYPE +t, pos);
 									}
-								case Failure (e): Context.error("Could not find type: " +e, pos);
+								case Failure(e):
+									switch(expr.getName())
+									{
+										case Success(name):
+											if (monos.exists(name))
+												monos.get(name);
+											else
+												Context.error(NO_SUCH_TYPE +e, pos);
+										default: Context.error(NO_SUCH_TYPE +e, pos);
+									}
 							}
 							ret.push(type);
 						}
 						ret;
 					default:
-						Context.error(MULTI_ENUM_EXPECTS_TYPE_LIST, pos);
+						Context.error(TYPE_LIST_EXPECTS_TYPE_LIST, pos);
 				}
-			default: Context.error(MULTI_ENUM_EXPECTS_TYPE_LIST, pos);
+			default: Context.error(TYPE_LIST_EXPECTS_TYPE_LIST, pos);
 		}
+	}
+
+	static public function monofy(type:ComplexType, monos:Hash<Type>):ComplexType
+	{
+		return switch(type)
+		{
+			case TPath(path):
+				if (path.pack.length == 0 && monos.exists(path.name))
+					monos.get(path.name).toComplex();
+				else
+					TPath(monofyParams(path, monos));
+			default:
+				type;
+		}
+	}
+	
+	static public function monofyParams(tp:TypePath, monos:Hash<Type>)
+	{
+		var newParams = [];
+		for (param in tp.params)
+		{
+			switch(param)
+			{
+				case TPType(ct):
+					newParams.push(TPType(monofy(ct, monos)));
+				default:
+					newParams.push(param);
+			}
+		}
+		return { name:tp.name, pack:tp.pack, sub:tp.sub, params:newParams };
+	}
+	
+	static public function makeMono()
+	{
+		return "null".resolve().typeof().sure();
+	}
+	
+	static public function makeMonoHash(names:Iterable<String>)
+	{
+		var hash = new Hash();
+		for (name in names)
+			hash.set(name, makeMono());
+		return hash;
+	}
+	
+	static public function merge(h1:Hash<Type>, h2:Hash<Type>)
+	{
+		var h3 = new Hash();
+		for (key in h1.keys())
+			h3.set(key, h1.get(key));
+		for (key in h2.keys())
+			h3.set(key, h2.get(key));
+		return h3;
 	}
 	
 	static public function toName(pack:Array<String>, name:String)
 		return pack.length == 0 ? name : pack.join(".") + "." + name
 		
-	static var MULTI_ENUM_EXPECTS_TYPE_LIST = "Union expects one argument of type [type list].";
+	static var NO_SUCH_TYPE = "Could not find type: ";
+	static var TYPE_LIST_EXPECTS_TYPE_LIST = "Union expects one argument of type [type list].";
 }
 
 #end

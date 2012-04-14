@@ -18,8 +18,6 @@ class TestTuple extends TestCase, implements TupleSupport
 		
 		var c3 = (["Hello", 122]);
 		assertTrue(Std.string(Type.typeof(c1)) == Std.string(Type.typeof(c3)));
-		assertFalse(Std.string(Type.typeof(c1)) == Std.string(Type.typeof(c2)));
-		assertFalse(Std.string(Type.typeof(c2)) == Std.string(Type.typeof(c3)));
 		
 		takeTuple(([1902, "foo"]));
 		
@@ -35,6 +33,13 @@ class TestTuple extends TestCase, implements TupleSupport
 		var c6 = takeAndReturnTuple(([12, 66]));
 		assertEquals("12", c6.val1);
 		assertEquals("66", c6.val2);
+		
+		var c7 = takeAndReturnTuple(([12, 66]));
+		assertEquals("12", c7.val1);
+		assertEquals("66", c7.val2);
+		
+		var c8 = takeWithParams("foo", ([9, 2, "bar"]));
+		assertEquals("barfoo", c8[0]);
 	}
 	
 	public function createTuple()
@@ -60,5 +65,15 @@ class TestTuple extends TestCase, implements TupleSupport
 	public function takeAndReturnTuple(input:Tuple<[Int, Int]>):Tuple<[String, String]>
 	{
 		return ([Std.string(input.val1), Std.string(input.val2)]);
+	}
+	
+	public function takeAndReturnTuple2(input)
+	{
+		return ([Std.string(input.val1), Std.string(input.val2)]);
+	}
+	
+	static public function takeWithParams<S>(s:S, input:Tuple<[Int, Int, S]>):Array<S>
+	{
+		return [input.val3 + s];
 	}
 }

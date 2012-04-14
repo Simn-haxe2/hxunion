@@ -17,9 +17,9 @@ class UnionBuilder
 	static var count = 0;
 	static var cache = new Hash<UnionInfo>();
 		
-	static public function buildUnion(tp:TypePath, pos):UnionInfo
+	static public function buildUnion(tp:TypePath, monos:Hash<Type>, pos):UnionInfo
 	{
-		return define(MacroHelper.getTypesFromTypePath(tp, pos), pos);
+		return define(MacroHelper.getTypesFromTypePath(tp, monos, pos), pos);
 	}
 	
 	static public function findUnion(name:String, unions:Array<UnionInfo>)

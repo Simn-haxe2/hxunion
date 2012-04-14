@@ -13,7 +13,8 @@ import hxunion.engine.Types;
 using tink.macro.tools.ExprTools;
 using tink.macro.tools.TypeTools;
 using tink.core.types.Outcome;
-
+using Lambda;
+using hxunion.engine.MacroHelper;
 #end
 
 class UnionTransformer
@@ -32,6 +33,8 @@ class UnionTransformer
 		if (ctx.cls.superClass != null)
 			MacroHelper.getMembers(ctx.cls.superClass.t.get(), env);
 			
+		var classMonos = MacroHelper.makeMonoHash(ctx.cls.params.map(function(p) return p.name));
+		
 		var fieldData = new Hash();
 		
 		for (field in ctx.members)
@@ -45,7 +48,7 @@ class UnionTransformer
 				case FFun(func):
 					var unionInfos:Array<UnionInfo> = [];
 					var funcCtx = [];
-					
+					var monos = func.params.map(function(p) return p.name).makeMonoHash().merge(classMonos);
 					var tfArgs = [];
 					for (arg in func.args)
 					{
@@ -53,9 +56,10 @@ class UnionTransformer
 							switch(arg.type)
 							{
 								case TPath(p):
+									arg.type = MacroHelper.monofy(arg.type, monos);
 									if (p.name == "Union")
 									{
-										var unionInfo = UnionBuilder.buildUnion(p, field.pos);
+										var unionInfo = UnionBuilder.buildUnion(p, monos, field.pos);
 										arg.type = unionInfo.cType;
 									}
 								default:
@@ -68,9 +72,10 @@ class UnionTransformer
 						switch(func.ret)
 						{
 							case TPath(p):
+								func.ret = MacroHelper.monofy(func.ret, monos);
 								if (p.name == "Union")
 								{
-									var unionInfo = UnionBuilder.buildUnion(p, field.pos);
+									var unionInfo = UnionBuilder.buildUnion(p, monos, field.pos);
 									func.ret = unionInfo.cType;
 									unionInfos.push(unionInfo);
 								}
