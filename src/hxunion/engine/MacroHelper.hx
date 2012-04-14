@@ -44,6 +44,17 @@ class MacroHelper
 						var ret = [];
 						for (expr in exprs)
 						{
+							switch(expr.getName())
+							{
+								case Success(name):
+									if (monos.exists(name))
+									{
+										ret.push(monos.get(name));
+										continue;
+									}
+								case Failure(_):
+							}
+							
 							var type = switch(expr.typeof())
 							{
 								case Success(t):
@@ -54,15 +65,7 @@ class MacroHelper
 										default: Context.error(NO_SUCH_TYPE +t, pos);
 									}
 								case Failure(e):
-									switch(expr.getName())
-									{
-										case Success(name):
-											if (monos.exists(name))
-												monos.get(name);
-											else
-												Context.error(NO_SUCH_TYPE +e, pos);
-										default: Context.error(NO_SUCH_TYPE +e, pos);
-									}
+									Context.error(NO_SUCH_TYPE +expr + ": " +e, pos);
 							}
 							ret.push(type);
 						}
