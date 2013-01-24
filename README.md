@@ -1,7 +1,9 @@
 Haxe Type Union
 =============
 
-This library allows usage of type unions by creating a common enumeration. 
+OBSOLETE: This library is no longer maintained
+
+This library allows usage of type unions by creating a common enumeration.
 
 Usage
 -------
